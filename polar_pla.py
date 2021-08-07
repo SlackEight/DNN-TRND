@@ -8,25 +8,34 @@ def bottom_up_pla(time_series, max_error):
 
     x = PiecewiseLinearSegmentation.Bottomup(max_error=max_error)
     output = []
-
+    trendX, trendY = [], []
     for trend in x.transform(time_series):
         # first we need the angle of inclination. We will normalize this to a value from -1 to 1 (-90 degrees to 90 degrees)
         # each trend has the structure [startX, startY, endX, endY], however this doesn't lend itself well to ML since 
         # incorrect x prediction values can go backwards.
         startX, startY, endX, endY = trend[0], trend[1], trend[2], trend[3]
+        trendX.append(trend[0])
+        trendY.append(trend[1])
+        trendX.append(trend[2])
+        trendY.append(trend[3])
+
         angle = np.rad2deg(np.arctan2(endY - startY, endX - startX))
         # now we need to normalize the angle to a value from -1 to 1
-        #angle /= 90
+        angle /= 90
         
         # now we need to calculate the length of the trend
         length = np.sqrt((endX - startX)**2 + (endY - startY)**2)
         output.append(angle)
-        output.append(length)#/200)
+        output.append(length)
     max_length = max(output)
+    print(max_length)
     w = open('trends.csv','w')
     for i in range(0,len(output),2):
-        w.write(str(output[i])+","+str(output[i+1])+"\n")
-
+        w.write(str(output[i])+","+str(output[i+1]/max_length)+"\n")
+    for val in range(1,len(output),2):
+        output[val] = output[val]/max_length
+    plt.plot(trendX,trendY)
+    plt.show()
     return output
 
 def display_trends(trends, startY):
