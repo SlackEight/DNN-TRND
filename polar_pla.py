@@ -27,6 +27,7 @@ def bottom_up_pla(time_series, max_error):
         length = np.sqrt((endX - startX)**2 + (endY - startY)**2)
         output.append(angle)
         output.append(length)
+
     max_length = max(output)
     print(max_length)
     w = open('trends.csv','w')
@@ -36,6 +37,7 @@ def bottom_up_pla(time_series, max_error):
         output[val] = output[val]/max_length
     plt.plot(trendX,trendY)
     plt.show()
+    print(max_length)
     return output
 
 def display_trends(trends, startY):
@@ -43,40 +45,12 @@ def display_trends(trends, startY):
     # it will also display the graph
     X = [0]
     Y = [startY]
-    for i in range(1,len(trends)):
+    for i in range(0,len(trends),2):
         #print(trends[i])
-        X.append(X[i-1]+(trends[i][1]*200)*np.cos(np.deg2rad(trends[i][0]*90)))
+        X.append(X[int(i/2)]+(trends[i+1])*np.cos(np.deg2rad(trends[i]*90)))
         #print(X[i-1]+(trends[i][1]*10)/np.cos(np.deg2rad(trends[i][0])))
-        Y.append(Y[i-1]+(trends[i][1]*200)*np.sin(np.deg2rad(trends[i][0]*90)))
+        Y.append(Y[int(i/2)]+(trends[i+1])*np.sin(np.deg2rad(trends[i]*90)))
         #print(Y[i-1]+(trends[i][1])*np.sin(np.deg2rad(trends[i][0])))
     plt.plot(X,Y)
     #plt.show()
 
-
-    trends = []
-    f = open('trends.csv', 'r')
-    for line in f:
-        trends.append([float(line.split(',')[0]), float(line.split(',')[1])])
-    display_trends(trends, 733.04)
-
-
-'''import PiecewiseLinearSegmentation
-
-x = PiecewiseLinearSegmentation.Bottomup(max_error=500)
-n = []
-f = open('DataSets/eth.csv', 'r')
-for line in f:
-    n.append(float(line))
-data = []
-X,Y = [],[]
-for trend in x.transform(n):
-    X.append(trend[0])
-    Y.append(trend[1])
-    X.append(trend[2])
-    Y.append(trend[3])
-plt.plot(X,Y)
-plt.show()
-
-#plt.plot(n)
-#plt.plot(X,Y)
-#plt.show()'''
