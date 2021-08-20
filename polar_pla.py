@@ -2,6 +2,7 @@ import PiecewiseLinearSegmentation
 import matplotlib.pyplot as plt
 import statistics
 import numpy as np
+import math
 from numpy.lib.function_base import average
 
 def bottom_up_pla(time_series, max_error):
@@ -19,12 +20,12 @@ def bottom_up_pla(time_series, max_error):
         trendX.append(trend[2])
         trendY.append(trend[3])
 
-        angle = np.rad2deg(np.arctan2(endY - startY, endX - startX))
+        angle = math.degrees(math.atan((endY - startY)/(endX - startX)))
         # now we need to normalize the angle to a value from -1 to 1
         angle /= 90
         
         # now we need to calculate the length of the trend
-        length = np.sqrt((endX - startX)**2 + (endY - startY)**2)
+        length = trend[2]-trend[0]#np.sqrt((endX - startX)**2 + (endY - startY)**2)
         output.append(angle)
         output.append(length)
 
@@ -37,7 +38,6 @@ def bottom_up_pla(time_series, max_error):
         output[val] = output[val]/max_length
     plt.plot(trendX,trendY)
     plt.show()
-    print(max_length)
     return output
 
 def display_trends(trends, startY):
