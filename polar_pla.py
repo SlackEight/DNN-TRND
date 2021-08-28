@@ -30,7 +30,7 @@ def bottom_up_pla(time_series, max_error):
         output.append(length)
 
     max_length = max(output)
-    print(max_length)
+    print("MAX LENGTH:"+str(max_length))
     w = open('trends.csv','w')
     for i in range(0,len(output),2):
         w.write(str(output[i])+","+str(output[i+1]/max_length)+"\n")
