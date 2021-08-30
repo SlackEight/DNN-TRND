@@ -2,3 +2,5 @@ __pycache__/
 angles.txt
 length.txt
 trends.csv
+DataSets/eurusd_minute.csv
+DataSets/eurusd.csv

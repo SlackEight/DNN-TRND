@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn
 from torch.autograd import Variable
 
+#Chesney's models
+
 class RNN(nn.Module):
     def __init__(self, output_size, input_size, hidden_size, num_layers):
         super(RNN, self).__init__()
@@ -83,3 +85,75 @@ class LSTM(nn.Module):
         out = self.fc(h_out)
         
         return out
+
+
+# Morgan's models
+
+class MLP(nn.Module):
+    def __init__(self, seq_len, hidden_size, dropout):
+        super().__init__()
+        self.fc1 = nn.Linear(seq_len, hidden_size)
+        self.fc2 = nn.Linear(hidden_size, hidden_size)
+        self.fc3 = nn.Linear(hidden_size, hidden_size)
+        self.fc4 = nn.Linear(hidden_size, 1)
+        self.do = nn.Dropout(dropout)
+        self.init_weights()
+    
+    def init_weights(m):
+        if isinstance(m, nn.Linear):
+            torch.nn.init.kaiming_uniform_(m.weight, a=0, mode='fan_in', nonlinearity='leaky_relu')
+            m.bias.data.fill_(0.01)
+
+    def forward(self, x):
+        x = self.fc1(x)
+        x = torch.relu(self.fc2(x))
+        x = self.do(x)
+        x = torch.relu(self.fc3(x))
+        x = torch.tanh(self.fc4(x))
+        return x
+
+class CNN(nn.Module):
+    """Convolutional Neural Networks"""
+    def __init__(self, input_size, hidden_dim, dropout, kernel_size):
+        super(CNN, self).__init__()
+
+        self.main = nn.Sequential(
+            nn.Conv1d(in_channels=input_size, out_channels=hidden_dim, kernel_size=kernel_size),
+            nn.ReLU(inplace=True),
+
+            nn.Flatten(),
+            nn.Dropout(dropout, inplace=False),
+            nn.Linear(hidden_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Linear(hidden_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Linear(hidden_dim, 1)
+        )
+        self.init_weights()
+    
+    def init_weights(m):
+        if isinstance(m, nn.Linear):
+            torch.nn.init.kaiming_uniform_(m.weight, a=0, mode='fan_in', nonlinearity='leaky_relu')
+            m.bias.data.fill_(0.01)
+
+    def forward(self, x):
+        out = self.main(x)
+        return out
+
+from tcn import TemporalConvNet
+
+class TCN(nn.Module):
+    def __init__(self, input_size, output_size, num_channels, kernel_size, dropout):
+        super(TCN, self).__init__()
+        self.tcn = TemporalConvNet(input_size, num_channels, kernel_size=kernel_size, dropout=dropout)
+        self.linear = nn.Linear(num_channels[-1], output_size)
+        self.init_weights()
+
+    def init_weights(m):
+        if isinstance(m, nn.Linear):
+            torch.nn.init.kaiming_uniform_(m.weight, a=0, mode='fan_in', nonlinearity='leaky_relu')
+            m.bias.data.fill_(0.01)
+
+    def forward(self, x):
+        y1 = torch.relu(self.tcn(x))
+        return self.linear(y1[:, :, -1])
