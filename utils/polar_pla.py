@@ -58,7 +58,7 @@ def bottom_up_pla(time_series, max_error):
         output.append(length)
 
     max_length = max(output)
-    print("MAX LENGTH:"+str(max_length))
+    #print("MAX LENGTH:"+str(max_length))
     w = open('trends.csv','w')
     for i in range(0,len(output),2):
         w.write(str(output[i])+","+str(output[i+1]/max_length)+"\n")
@@ -93,7 +93,7 @@ def sliding_window_pla(time_series, max_error):
         output.append(length)
 
     max_length = max(output)
-    print("MAX LENGTH:"+str(max_length))
+    #print("MAX LENGTH:"+str(max_length))
     w = open('trends.csv','w')
     for i in range(0,len(output),2):
         w.write(str(output[i])+","+str(output[i+1]/max_length)+"\n")
@@ -148,28 +148,19 @@ def bottom_up(time_series, max_error, minimum_trend_length):
 def sliding_window(time_series, max_error):
     anchor = 0
     trends = []
-    print(len(time_series))
     window_size = 3
     # initial calculation 
     data = time_series[0:window_size]
     E_x = (window_size+1)/2
-    print(E_x)
     E_y = average(data)
-    print(E_y)
     E_y2= average(np.square(data))
-    print("E_y2  "+str(E_y2))
     yes = []
     for fish in range(len(data)):
         yes.append(data[fish]*(fish+1))
     E_xy = (sum(yes))/window_size
-    print("E_xy  "+str(E_xy))
     E_x2 = average(np.square(range(1,window_size+1)))
-    print("E_x2  "+str(E_x2))
     m = (E_x*E_y-E_xy)/(E_x**2-E_x2)
-    print(data)
-    print("m  "+str(m))
     b = E_y-m*E_x
-    print(b)
     loss = E_y2 - 2 * (m * E_xy + b * E_y) + m**2 * E_x2 + 2 * m * b * E_x + b**2
 
     # now expand the window size

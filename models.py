@@ -5,7 +5,7 @@ from torch.autograd import Variable
 #Chesney's models
 
 class RNN(nn.Module):
-    def __init__(self, output_size, input_size, hidden_size, num_layers):
+    def __init__(self, output_size, input_size, hidden_size, num_layers, dropout):
         super(RNN, self).__init__()
         self.num_layers = num_layers
         self.input_size = input_size
@@ -17,82 +17,90 @@ class RNN(nn.Module):
             num_layers=num_layers,
             batch_first=True
         )
+        self.dropout = nn.Dropout(dropout)
         
         self.fc = nn.Linear(hidden_size, output_size)
 
     def forward(self, input):
+        #print(input.size(0))
         h_0 = Variable(torch.zeros(self.num_layers, input.size(0), self.hidden_size))
         output, hidden = self.rnn(input, h_0)
-        out = self.fc(hidden)
+        #print(output.shape)
+        #print(output[:, -1, :].shape)
+        out = output[:, -1, :]
+        out = self.dropout(out)
+        #out = hidden[-1]
+        out = self.fc(out)
 
         return out
+
+
+#Chesney's models
+class LSTM(nn.Module):
+    def __init__(self, num_classes, input_size, hidden_size, num_layers, dropout):
+        super().__init__()
+        self.num_classes = num_classes
+        self.input_size = input_size
+        self.hidden_size = hidden_size
+        self.num_layers = num_layers
+        
+        self.LSTM = nn.LSTM(
+            input_size = input_size,
+            hidden_size = hidden_size,
+            num_layers = num_layers,
+            batch_first = True,
+        )
+        self.dropout = nn.Dropout(dropout)
+        self.fc = nn.Linear(hidden_size, 1)
+
+    def forward(self, x):
+        h_0 = Variable(torch.zeros(
+            self.num_layers, x.size(0), self.hidden_size))
+        c_0 = Variable(torch.zeros(
+            self.num_layers, x.size(0), self.hidden_size))
+        output, (hidden, _) = self.LSTM(x, (h_0, c_0))
+        out = output[:, -1, :]
+        #out = hidden[-1]
+        out = self.dropout(out)
+
+        return self.fc(out)
 
 
 class BiLSTM(nn.Module):
-    def __init__(self, num_classes, input_size, hidden_size, num_layers):
-        super(BiLSTM, self).__init__()
+    def __init__(self, num_classes, input_size, hidden_size, num_layers, dropout):
+        super().__init__()
         self.num_classes = num_classes
-        self.num_layers = num_layers
         self.input_size = input_size
-        self.hidden_size = hidden_size
-        self.bilstm = nn.LSTM(input_size=input_size,
-                            hidden_size=hidden_size,
-                            num_layers=num_layers, 
-                            batch_first=True,
-                            bidirectional=True
-                            )
-                            
-        self.fc = nn.Linear(hidden_size * 2, num_classes)
+        self.hidden_size = hidden_size 
+        self.num_layers = num_layers
+        
+        self.LSTM = nn.LSTM(
+            input_size = input_size,
+            hidden_size = hidden_size,
+            num_layers = num_layers,
+            batch_first = True,
+            bidirectional=True,
+        )
+        self.dropout = nn.Dropout(dropout)
+        self.fc = nn.Linear(hidden_size*2, 1)
 
     def forward(self, x):
         h_0 = Variable(torch.zeros(
             self.num_layers * 2, x.size(0), self.hidden_size))
         c_0 = Variable(torch.zeros(
             self.num_layers * 2, x.size(0), self.hidden_size))
-        
-        # Propagate input through LSTM
-        _, (h_out, _) = self.bilstm(x, (h_0, c_0))
-        h_out = h_out.view(-1, self.hidden_size * 2)
-        out = self.fc(h_out)
-        
-        return out
+        output, (hidden, _) = self.LSTM(x, (h_0, c_0))
+        out = output[:, -1, :]
+        out = self.dropout(out)
 
-class LSTM(nn.Module):
-
-    def __init__(self, num_classes, input_size, hidden_size, num_layers):
-        super(LSTM, self).__init__()
-        self.num_classes = num_classes
-        self.num_layers = num_layers
-        self.input_size = input_size
-        self.hidden_size = hidden_size
-        self.lstm = nn.LSTM(input_size=input_size,
-                            hidden_size=hidden_size,
-                            num_layers=num_layers, 
-                            batch_first=True
-                            )
-                            
-        self.fc = nn.Linear(hidden_size, num_classes)
-
-    def forward(self, x):
-        h_0 = Variable(torch.zeros(
-            self.num_layers, x.size(0), self.hidden_size))
-        c_0 = Variable(torch.zeros(
-            self.num_layers, x.size(0), self.hidden_size))
-        
-        # Propagate input through LSTM
-        ula, (h_out, _) = self.lstm(x, (h_0, c_0))
-        h_out = h_out.view(-1, self.hidden_size)
-        out = self.fc(h_out)
-        
-        return out
-
+        return self.fc(out)
 
 # Morgan's models
 
 class MLP(nn.Module):
-    def __init__(self, seq_len, hidden_size, dropout):
+    def __init__(self, input_size, hidden_size, dropout):
         super().__init__()
-        self.fc1 = nn.Linear(seq_len, hidden_size)
+        self.fc1 = nn.Linear(input_size, hidden_size)
         self.fc2 = nn.Linear(hidden_size, hidden_size)
         self.fc3 = nn.Linear(hidden_size, hidden_size)
         self.fc4 = nn.Linear(hidden_size, 1)
