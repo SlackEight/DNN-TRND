@@ -11,6 +11,7 @@ class RNN(nn.Module):
         self.input_size = input_size
         self.output_size = output_size
         self.hidden_size = hidden_size
+        self.init_weights()
         self.rnn = nn.RNN(
             input_size=input_size,
             hidden_size=hidden_size,
@@ -21,15 +22,16 @@ class RNN(nn.Module):
         
         self.fc = nn.Linear(hidden_size, output_size)
 
+    def init_weights(m):
+        if isinstance(m, nn.Linear):
+            torch.nn.init.kaiming_uniform_(m.weight, a=0, mode='fan_in', nonlinearity='leaky_relu')
+            m.bias.data.fill_(0.01)
+
     def forward(self, input):
-        #print(input.size(0))
         h_0 = Variable(torch.zeros(self.num_layers, input.size(0), self.hidden_size))
-        output, hidden = self.rnn(input, h_0)
-        #print(output.shape)
-        #print(output[:, -1, :].shape)
+        output, hidden = self.rnn(input, h_0.detach())
         out = output[:, -1, :]
         out = self.dropout(out)
-        #out = hidden[-1]
         out = self.fc(out)
 
         return out
@@ -43,6 +45,7 @@ class LSTM(nn.Module):
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.num_layers = num_layers
+        self.init_weights()
         
         self.LSTM = nn.LSTM(
             input_size = input_size,
@@ -51,14 +54,19 @@ class LSTM(nn.Module):
             batch_first = True,
         )
         self.dropout = nn.Dropout(dropout)
-        self.fc = nn.Linear(hidden_size, 1)
+        self.fc = nn.Linear(hidden_size, num_classes)
+    
+    def init_weights(m):
+        if isinstance(m, nn.Linear):
+            torch.nn.init.kaiming_uniform_(m.weight, a=0, mode='fan_in', nonlinearity='leaky_relu')
+            m.bias.data.fill_(0.01)
 
     def forward(self, x):
         h_0 = Variable(torch.zeros(
             self.num_layers, x.size(0), self.hidden_size))
         c_0 = Variable(torch.zeros(
             self.num_layers, x.size(0), self.hidden_size))
-        output, (hidden, _) = self.LSTM(x, (h_0, c_0))
+        output, (hidden, _) = self.LSTM(x, (h_0.detach(), c_0.detach()))
         out = output[:, -1, :]
         #out = hidden[-1]
         out = self.dropout(out)
@@ -73,6 +81,7 @@ class BiLSTM(nn.Module):
         self.input_size = input_size
         self.hidden_size = hidden_size 
         self.num_layers = num_layers
+        self.init_weights()
         
         self.LSTM = nn.LSTM(
             input_size = input_size,
@@ -82,14 +91,19 @@ class BiLSTM(nn.Module):
             bidirectional=True,
         )
         self.dropout = nn.Dropout(dropout)
-        self.fc = nn.Linear(hidden_size*2, 1)
+        self.fc = nn.Linear(hidden_size*2, num_classes)
+
+    def init_weights(m):
+        if isinstance(m, nn.Linear):
+            torch.nn.init.kaiming_uniform_(m.weight, a=0, mode='fan_in', nonlinearity='leaky_relu')
+            m.bias.data.fill_(0.01)
 
     def forward(self, x):
         h_0 = Variable(torch.zeros(
             self.num_layers * 2, x.size(0), self.hidden_size))
         c_0 = Variable(torch.zeros(
             self.num_layers * 2, x.size(0), self.hidden_size))
-        output, (hidden, _) = self.LSTM(x, (h_0, c_0))
+        output, (hidden, _) = self.LSTM(x, (h_0.detach(), c_0.detach()))
         out = output[:, -1, :]
         out = self.dropout(out)
 
