@@ -219,6 +219,24 @@ def draw_segments(segments):
         line = Line2D((segment[0],segment[2]),(segment[1],segment[3]))
         ax.add_line(line)
 
+def preprocess(file_name, filter_size, pls_max_error):
+    '''
+        Performs all data preprocessing steps and returns a processed trend series
+    '''
+    # read in the time series
+    f = open(file_name, 'r')
+    time_series = []
+    for line in f:
+        time_series.append(float(line))
+
+    # apply median filter
+    time_series = median_filter(time_series, filter_size)
+
+    # apply sliding window piecewise linear segmentation
+    x, _ = sliding_window_pla(time_series, pls_max_error)
+    return x
+
+
 if __name__ == "__main__":
     f = open('DataSets/CTtemp.csv')
     data = f.readlines()[0:1000]

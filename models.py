@@ -112,12 +112,12 @@ class BiLSTM(nn.Module):
 # Morgan's models
 
 class MLP(nn.Module):
-    def __init__(self, input_size, hidden_size, dropout):
+    def __init__(self, input_size, hidden_size, output_size, dropout):
         super().__init__()
         self.fc1 = nn.Linear(input_size, hidden_size)
         self.fc2 = nn.Linear(hidden_size, hidden_size)
         self.fc3 = nn.Linear(hidden_size, hidden_size)
-        self.fc4 = nn.Linear(hidden_size, 1)
+        self.fc4 = nn.Linear(hidden_size, output_size)
         self.do = nn.Dropout(dropout)
         self.init_weights()
     
@@ -136,7 +136,7 @@ class MLP(nn.Module):
 
 class CNN(nn.Module):
     """Convolutional Neural Networks"""
-    def __init__(self, input_size, hidden_dim, dropout, kernel_size):
+    def __init__(self, input_size, hidden_dim, output_size, kernel_size, dropout):
         super(CNN, self).__init__()
 
         self.main = nn.Sequential(
@@ -149,7 +149,7 @@ class CNN(nn.Module):
             nn.ReLU(),
             nn.Linear(hidden_dim, hidden_dim),
             nn.ReLU(),
-            nn.Linear(hidden_dim, 1)
+            nn.Linear(hidden_dim, output_size)
         )
         self.init_weights()
     
