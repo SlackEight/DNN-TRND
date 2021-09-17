@@ -1,0 +1,18 @@
+slope results:
+av = 0.067 | dev = 0.005 | tp = 141 | tn = 68 | fp = 11 | fn = 0
+accuracy = 0.95 | sensitivity = 1.0 | specificity = 0.8607594936708861 | F1 = 0.9251700680272108
+length results:
+av = 0.183 | dev = 0.013
+
+slope results:
+av = 0.591 | dev = 0.011 | tp = 2324 | tn = 516 | fp = 220 | fn = 0
+accuracy = 0.9281045751633987 | sensitivity = 1.0 | specificity = 0.7010869565217391 | F1 = 0.8242811501597443
+length results:
+av = 0.116 | dev = 0.007
+
+slope results:
+av = 0.3 | dev = 0.004 | tp = 733 | tn = 332 | fp = 195 | fn = 0
+accuracy = 0.8452380952380952 | sensitivity = 1.0 | specificity = 0.6299810246679317 | F1 = 0.7729918509895227
+length results:
+av = 0.188 | dev = 0.001
+

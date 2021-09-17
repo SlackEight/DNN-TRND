@@ -1,0 +1,12 @@
+slope results:
+av = 0.069 | dev = 0.003 | tp = 80 | tn = 87 | fp = 13 | fn = 20
+accuracy = 0.835 | sensitivity = 0.8 | specificity = 0.87 | F1 = 0.8335329341317367
+
+slope results:
+av = 0.59 | dev = 0.01 | tp = 2027 | tn = 556 | fp = 224 | fn = 253
+accuracy = 0.8441176470588235 | sensitivity = 0.8890350877192983 | specificity = 0.7128205128205128 | F1 = 0.791235423380161
+
+slope results:
+av = 0.303 | dev = 0.008 | tp = 377 | tn = 442 | fp = 218 | fn = 223
+accuracy = 0.65 | sensitivity = 0.6283333333333333 | specificity = 0.6696969696969697 | F1 = 0.6483560950935762
+

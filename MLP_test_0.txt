@@ -1,0 +1,26 @@
+slope results:
+av = 0.057 | dev = 0.004 | tp = 97 | tn = 80 | fp = 20 | fn = 3
+accuracy = 0.885 | sensitivity = 0.97 | specificity = 0.8 | F1 = 0.8768361581920904
+
+slope results:
+av = 0.609 | dev = 0.015 | tp = 1993 | tn = 559 | fp = 221 | fn = 287
+accuracy = 0.8339869281045752 | sensitivity = 0.8741228070175439 | specificity = 0.7166666666666667 | F1 = 0.7876022424409521
+
+slope results:
+av = 0.302 | dev = 0.013 | tp = 355 | tn = 472 | fp = 188 | fn = 245
+accuracy = 0.6563492063492063 | sensitivity = 0.5916666666666667 | specificity = 0.7151515151515152 | F1 = 0.6475748792270533
+
+
+-----------------------------
+slope results:
+av = 0.066 | dev = 0.003 | tp = 84 | tn = 80 | fp = 20 | fn = 16
+accuracy = 0.82 | sensitivity = 0.84 | specificity = 0.8 | F1 = 0.8195121951219512
+
+slope results:
+av = 0.588 | dev = 0.002 | tp = 2021 | tn = 572 | fp = 208 | fn = 259
+accuracy = 0.8473856209150327 | sensitivity = 0.8864035087719299 | specificity = 0.7333333333333333 | F1 = 0.8026356169329362
+
+slope results:
+av = 0.293 | dev = 0.002 | tp = 333 | tn = 436 | fp = 224 | fn = 267
+accuracy = 0.6103174603174604 | sensitivity = 0.555 | specificity = 0.6606060606060606 | F1 = 0.6032157547052225
+
