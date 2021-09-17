@@ -1,4 +1,0 @@
-slope results:
-av = 0.06 | dev = 0.005 | tp = 48 | tn = 43 | fp = 7 | fn = 2
-accuracy = 0.91 | sensitivity = 0.96 | specificity = 0.86 | F1 = 0.9072527472527473
-

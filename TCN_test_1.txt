@@ -1,9 +1,0 @@
-length results:
-av = 0.155 | dev = 0.006
-
-length results:
-av = 0.097 | dev = 0.004
-
-length results:
-av = 0.192 | dev = 0.004
-
