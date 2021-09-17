@@ -126,7 +126,8 @@ def dataload(window_func ,batch_size, data, seq_len, train_proportion, component
 
 
 
-def test_model(model, trainset, validateset, testset, learning_rate, component, training_epochs, models_to_average):
+def test_model(model, trainset, validateset, testset, learning_rate, component, training_epochs, models_to_average, outputfile):
+    outf = open(outputfile, 'a')
     import math
     import statistics
     res_1 = []
@@ -269,7 +270,7 @@ def test_model(model, trainset, validateset, testset, learning_rate, component, 
                 for i in range(len(output)): # directional accuracy check
                     pred = output[i][0]
                     actual = labels[i][0]
-                    if pred > 0 and actual > 0 or (pred-actual)<0.022: # true positive with 2 degree lee way
+                    if pred > 0 and actual > 0: # true positive with 2 degree lee way
                         tp += 1
                     elif pred < 0 and actual < 0: # true negative
                         tn += 1
@@ -286,21 +287,41 @@ def test_model(model, trainset, validateset, testset, learning_rate, component, 
         if component == 2:
             res_1.append(math.sqrt(total_loss_slope))
             res_2.append(math.sqrt(total_loss_length))
-            print(f'{math.sqrt(total_loss_slope)}, {math.sqrt(total_loss_length)}')
+            #print(f'{math.sqrt(total_loss_slope)}, {math.sqrt(total_loss_length)}')
         else:
             res_1.append(math.sqrt(total_loss))
-            print(f'{math.sqrt(total_loss)}')
+            #print(f'{math.sqrt(total_loss)}')
     
     if component == 0 or component == 2:
-        print(f'μ = {round(sum(res_1) / len(res_1 ),3)} | σ = {round(statistics.pstdev(res_1),3)} | tp = {tp} | tn = {tn} | fp = {fp} | fn = {fn}')
+        #print("slope results:")
+        outf.write("slope results:\n")
+        #print(f'μ = {round(sum(res_1) / len(res_1 ),3)} | σ = {round(statistics.pstdev(res_1),3)} | tp = {tp} | tn = {tn} | fp = {fp} | fn = {fn}')
+        outf.write(f'av = {round(sum(res_1) / len(res_1 ),3)} | dev = {round(statistics.pstdev(res_1),3)} | tp = {tp} | tn = {tn} | fp = {fp} | fn = {fn}\n')
+        sensitivity = tp/(tp+fn)
+        specificity = tn/(tn+fp)
+        f1 = 2*sensitivity*specificity/(sensitivity+specificity)
+        #print(f'accuracy = {(tp+tn)/(fp+fn+tp+tn)} | sensitivity = {sensitivity} | specificity = {specificity} | F1 = {f1}')
+        outf.write(f'accuracy = {(tp+tn)/(fp+fn+tp+tn)} | sensitivity = {sensitivity} | specificity = {specificity} | F1 = {f1}\n')
 
     if component == 1:
-        print(f'μ = {round(sum(res_1) / len(res_1 ),3)} | σ = {round(statistics.pstdev(res_1),3)}')
+        #print(f'μ = {round(sum(res_1) / len(res_1 ),3)} | σ = {round(statistics.pstdev(res_1),3)}')
+        outf.write("length results:\n")
+        outf.write(f'av = {round(sum(res_1) / len(res_1 ),3)} | dev = {round(statistics.pstdev(res_1),3)}\n')
     
     if component == 2:
-        print(f'μ = {round(sum(res_2) / len(res_2 ),3)} | σ = {round(statistics.pstdev(res_2),3)}')
+        #print(f'μ = {round(sum(res_2) / len(res_2 ),3)} | σ = {round(statistics.pstdev(res_2),3)}')
+        outf.write("length results:\n")
+        outf.write(f'av = {round(sum(res_2) / len(res_2 ),3)} | dev = {round(statistics.pstdev(res_2),3)}\n')
+    outf.write("\n")
+    outf.close()
 
 
-def train_and_test(model, trends, train_proportion, models_to_average, lr, batch_size, seq_length, training_epochs, component):
-    trainset, validationset, testset = dataload(sliding_window_MLP ,batch_size, trends, seq_length, train_proportion, component)
-    test_model(model, trainset, validationset, testset, lr, component, training_epochs, models_to_average)
+def train_and_test(model, trends, train_proportion, models_to_average, lr, batch_size, seq_length, training_epochs, component, output_file):
+    s_window = sliding_window_MLP
+
+    if isinstance(model, models.CNN) or isinstance(model, models.TCN):
+        s_window = sliding_window_CNN
+    elif isinstance(model, models.RNN) or isinstance(model, models.LSTM) or isinstance(model, models.BiLSTM):
+        s_window = sliding_window_RNN
+    trainset, validationset, testset = dataload(s_window ,batch_size, trends, seq_length, train_proportion, component)
+    test_model(model, trainset, validationset, testset, lr, component, training_epochs, models_to_average, output_file)

@@ -24,8 +24,8 @@ component = 0  # 0 to predict trend, 1 to predict duration, 2 for a dual approac
 hidden_size = 64                                                                                            # x
 lr = 0.001                                                                                                  # x
 batch_size = 64                                                                                             # x
-seq_length = 8                                                                                              # x
-dropout = 0.2                                                                                               # x
+seq_length = 4                                                                                              # x
+dropout = 0.1                                                                                               # x
 training_epochs = 500                                                                                       # x
 # TCN only:
 kernel_size = 4                                                                                             # x

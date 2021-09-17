@@ -6,3 +6,6 @@ DataSets/eurusd_minute.csv
 DataSets/eurusd.csv
 results.txt
 results2.txt
+temp.pt
+utils/__pycache__
+utils/angles.txt
