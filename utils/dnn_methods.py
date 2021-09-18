@@ -225,27 +225,27 @@ def test_model(model, trainset, validateset, testset, learning_rate, component, 
             output_slopes = []
             for out in labels:
                 output_slopes.append(np.array([out[0]]))
-            output_slopes = Variable(torch.FloatTensor(output_slopes))
+            output_slopes = Variable(torch.FloatTensor(output_slopes)).to(dev)
 
             output_lengths = []
             for out in labels:
                 output_lengths.append(np.array([out[1]]))
-            output_lengths = Variable(torch.FloatTensor(output_lengths))
+            output_lengths = Variable(torch.FloatTensor(output_lengths)).to(dev)
 
             pred_slopes = []
             for out in output:
                 pred_slopes.append(np.array([out[0]]))
-            pred_slopes = Variable(torch.FloatTensor(pred_slopes))
+            pred_slopes = Variable(torch.FloatTensor(pred_slopes)).to(dev)
 
             pred_lengths = []
             for out in output:
                 pred_lengths.append(np.array([out[1]]))
-            pred_lengths = Variable(torch.FloatTensor(pred_lengths))
+            pred_lengths = Variable(torch.FloatTensor(pred_lengths)).to(dev)
         
-            for i in range(len(output)): # true and false directional classifications
-                pred = output[i][0]
+            for i in range(len(output_slopes)): # true and false directional classifications
+                pred = pred_slopes[i][0]
                 actual = labels[i][0]
-                if pred > 0 and actual > 0 or (pred-actual)<0.022: # true positive with 2 degree lee way
+                if pred > 0 and actual > 0 or 0<(abs(pred)-abs(actual))<0.022: # true positive with 2 degree lee way
                     tp += 1
                 elif pred < 0 and actual < 0: # true negative
                     tn += 1

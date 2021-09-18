@@ -14,32 +14,32 @@ datasets = [["DataSets/CTtemp.csv",5,6000],["DataSets/snp500.csv",10,10],["DataS
 train_proportion = 0.7 # keep this constant across tests
 models_to_average = 10 # keep this constant across tests
 
-######## your test goes here #########
+        #--------- your test goes here, modifiable attributes are labelled with an x ---------#
 
 # dataset and model type #
-dataset = datasets[0]  # Change this to test different datasets.                                            # x 
-component = 0  # 0 to predict trend, 1 to predict duration, 2 for a dual approach (trend and duration)      # x
+dataset = datasets[0]  # Change the index to test different datasets.                                       # x 
+component = 2  # 0 to predict trend, 1 to predict duration, 2 for a dual approach (trend and duration)      # x
 
-# hyperparameters #
-hidden_size = 64                                                                                            # x
-lr = 0.01                                                                                                  # x
-batch_size = 64                                                                                             # x
-seq_length = 8                                                                                              # x
-dropout = 0.2                                                                                               # x
-training_epochs = 500                                                                                       # x
-# TCN only:
-kernel_size = 2                                                                                             # x
-n_layers = 4                                                                                                # x
+# hyperparameters #                                                                                         # x
+
+hidden_size=128
+lr=0.01
+batch_size=64
+seq_length=4
+dropout=0.3
+training_epochs=2000
+# TCN only ↓
+kernel_size=2
+n_layers=4
 
 trends = preprocess(dataset[0], dataset[1], dataset[2])
-
 
 # now just simply uncomment the model you'd like to test:
 
 def create_DNN():                                                                                           # x
     #return MLP(seq_length*2, hidden_size, max(1,component), dropout).to(dev)
-    #return CNN(seq_length, hidden_size, max(1,component), 2, dropout).to(dev)
-    return TCN(seq_length,max(1, component), [hidden_size]*n_layers, kernel_size, dropout).to(dev)
+    return CNN(seq_length, hidden_size, max(1,component), 2, dropout).to(dev)
+    #return TCN(seq_length,max(1, component), [hidden_size]*n_layers, kernel_size, dropout).to(dev)
     #return LSTM(seq_length, hidden_size, max(1,component), dropout).to(dev)
     #return RNN(max(1,component), 2, hidden_size, 1, dropout).to(dev)
     #return LSTM(max(1,component), 2, hidden_size, 1, dropout).to(dev)
@@ -87,7 +87,7 @@ if component == 0 or component == 2:
     sensitivity = tp/(tp+fn)
     specificity = tn/(tn+fp)
     f1 = 2*sensitivity*specificity/(sensitivity+specificity)
-    if print_output: print(f'accuracy = {(tp+tn)/(fp+fn+tp+tn)} | sensitivity = {sensitivity} | specificity = {specificity} | F1 = {f1}')
+    if print_output: print(f'accuracy = {round((tp+tn)/(fp+fn+tp+tn),3)} | sensitivity = {round(sensitivity,3)} | specificity = {round(specificity,3)} | F1 = {round(f1,3)}')
     else: outf.write(f'accuracy = {(tp+tn)/(fp+fn+tp+tn)} | sensitivity = {sensitivity} | specificity = {specificity} | F1 = {f1}\n')
 
 if component == 1:
