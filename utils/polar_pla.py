@@ -99,7 +99,7 @@ def sliding_window_pla(time_series, max_error):
         w.write(str(output[i])+","+str(output[i+1]/max_length)+"\n")
     for val in range(1,len(output),2):
         output[val] = output[val]/max_length
-    plt.plot(trendX,trendY)
+    plt.plot(trendX,trendY, color='orange')
     plt.show()
     return output, max_length
 
@@ -228,6 +228,10 @@ def preprocess(file_name, filter_size, pls_max_error):
     time_series = []
     for line in f:
         time_series.append(float(line))
+    
+    # plot the time series in purple
+    plt.plot(time_series, color='orange')
+    plt.show()
 
     # apply median filter
     time_series = median_filter(time_series, filter_size)

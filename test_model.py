@@ -17,7 +17,7 @@ models_to_average = 10 # keep this constant across tests
         #--------- your test goes here, modifiable attributes are labelled with an x ---------#
 
 # dataset and model type #
-dataset = datasets[0]  # Change the index to test different datasets.                                       # x 
+dataset = datasets[2]  # Change the index to test different datasets.                                       # x 
 component = 2  # 0 to predict trend, 1 to predict duration, 2 for a dual approach (trend and duration)      # x
 
 # hyperparameters #                                                                                         # x
