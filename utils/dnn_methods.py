@@ -1,3 +1,4 @@
+from numpy.core.shape_base import block
 import torch
 import torch.nn.functional as F
 from torch.autograd import Variable
@@ -91,7 +92,8 @@ def sliding_window_CNN(data, seq_length, component):
         outputs.append(data[i+seq_length*2+component%2:i+seq_length*2+min(component+1,2)]) # and the one after that is the output
     return Variable(torch.cuda.FloatTensor(np.array(inputs)).to(dev)), Variable(torch.cuda.FloatTensor(np.array(outputs)).to(dev))
 
-def sliding_window_RNN(data, seq_length, component):
+def sliding_window_RNN(data, seq_length, component, k=1):
+    k = len(data)//k
     seq_length *= 2
     inputs = []
     outputs = []
@@ -101,6 +103,7 @@ def sliding_window_RNN(data, seq_length, component):
     return Variable(torch.cuda.FloatTensor(inputs).to(dev)), Variable(torch.cuda.FloatTensor(outputs).to(dev))
 
 def dataload(window_func ,batch_size, data, seq_len, train_proportion, component):
+
     # convert data to tensor, and apply dataloader
     total_data_input, total_data_output = window_func(data, seq_len, component)
     train_size = int(len(total_data_input)*train_proportion)
@@ -126,7 +129,38 @@ def dataload(window_func ,batch_size, data, seq_len, train_proportion, component
     testset = torch.utils.data.DataLoader(test, batch_size=batch_size, shuffle=False)
     return trainset, validateset, testset
 
+def dataload_walkforward(window_func ,batch_size, data, seq_len, component, k, index):
+    # k fold walk forward validation with overlapping windows
+    # after doing some maths it seems logical to divide the data into blocks. We'll use something like
+    # 3 blocks of training data, 1 block of validating and 1 block of testing. The relationship between
+    # number of folds and block size, given our ratio, is: block_size = setsize/(k+4)
 
+    # get the inputs and outputs for this fold
+    fold_inputs, fold_outputs = window_func(data, seq_len, component)
+
+    train_blocks = 3 # and 1 for validate and one for test. Just change this to change the ratio
+    block_size = len(fold_inputs)//(k+4)
+    train_size = train_blocks * block_size
+    train_index = index * block_size
+    
+    training_input = torch.narrow(fold_inputs, 0, train_index, train_size)
+    training_output = torch.narrow(fold_outputs, 0, train_index, train_size)
+
+    validation_input = torch.narrow(fold_inputs, 0, train_index+train_size, block_size).to(dev)
+    validation_output = torch.narrow(fold_outputs, 0, train_index+train_size, block_size).to(dev)
+
+    testing_input = torch.narrow(fold_inputs, 0, train_index+train_size+block_size, block_size).to(dev)
+    testing_output = torch.narrow(fold_outputs, 0, train_index+train_size+block_size, block_size).to(dev)
+
+    train = torch.utils.data.TensorDataset(training_input, training_output)
+    validate = torch.utils.data.TensorDataset(validation_input, validation_output)
+    test = torch.utils.data.TensorDataset(testing_input, testing_output)
+
+    trainset = torch.utils.data.DataLoader(train, batch_size=batch_size, shuffle=False)
+    validateset = torch.utils.data.DataLoader(validate, batch_size=batch_size, shuffle=False)
+    testset = torch.utils.data.DataLoader(test, batch_size=batch_size, shuffle=False)
+
+    return trainset, validateset, testset
 
 def test_model(model, trainset, validateset, testset, learning_rate, component, training_epochs):
     tp = 0
@@ -289,12 +323,34 @@ def test_model(model, trainset, validateset, testset, learning_rate, component, 
 
 
 
-def train_and_test(model, trends, train_proportion, lr, batch_size, seq_length, training_epochs, component):
+def train_and_test(create_model, trends, train_proportion, lr, batch_size, seq_length, training_epochs, component):
+    model = create_model()
     s_window = sliding_window_MLP
 
     if isinstance(model, models.CNN) or isinstance(model, models.TCN):
         s_window = sliding_window_CNN
     elif isinstance(model, models.RNN) or isinstance(model, models.LSTM) or isinstance(model, models.BiLSTM):
         s_window = sliding_window_RNN
-    trainset, validationset, testset = dataload(s_window ,batch_size, trends, seq_length, train_proportion, component)
-    return test_model(model, trainset, validationset, testset, lr, component, training_epochs)
+    #trainset, validationset, testset = dataload(s_window ,batch_size, trends, seq_length, train_proportion, component)
+    k = 4
+    trainset, validationset, testset = dataload_walkforward(s_window ,batch_size, trends, seq_length, component, k, 0)
+    output = test_model(model, trainset, validationset, testset, lr, component, training_epochs)
+
+    output[0] /= k
+    if component == 2: output[1] /= k
+
+    for i in range(1,k):
+        #model = create_model()
+        trainset, validationset, testset = dataload_walkforward(s_window ,batch_size, trends, seq_length, component, k, i)
+        res1 = test_model(model, trainset, validationset, testset, lr, component, training_epochs)
+        if component == 2:
+            output[0] += res1[0]/k
+            output[1] += res1[1]/k
+            for j in range(2,len(output)):
+                output[j] += res1[j]
+        else:
+            output[0] += res1[0]/k
+            for j in range(1,len(output)):
+                output[j] += res1[j]
+    return output
+    # return test_model(model, trainset, validationset, testset, lr, component, training_epochs) for hold out
