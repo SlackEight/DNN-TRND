@@ -16,7 +16,7 @@ output_file = 'results.txt'
 file_names = ['CTtemp.csv','snp500.csv', 'hpc.csv']#,'hpc.csv', 'sin.csv']
 max_errors = [6000, 10, 5000]
 filter_size = [5,10,40]
-epochs_per_set = [1000,50,200]#[2000,100,200]
+epochs_per_set = [1,1,1]#[1000,50,200]#[2000,100,200]
 data_sets = []
 # now we need pre-process the data
 for i in range(len(file_names)):
@@ -92,10 +92,6 @@ for component in range(3):
                 +f'Dropout:{best_hyper_params[4]}\n'
                 +f'Dataset: {file_names[i]}')
         f.close()
-        #Now let's run the experiment on it
-        model = models.MLP(best_hyper_params[3]*2, best_hyper_params[0], max(1,component), best_hyper_params[4]).to(dev)
-        dm.train_and_test(model, data_set, train_proportion, 20,best_hyper_params[1],best_hyper_params[2],best_hyper_params[3],epochs_per_set[i], component, f"MLP_test_{component}.txt")
-
     bar.finish()
 
 
@@ -159,8 +155,6 @@ for component in range(3):
                 +f'Dropout:{best_hyper_params[4]}\n'
                 +f'Dataset: {file_names[i]}\n\n')
         f.close()
-        model = models.CNN(best_hyper_params[3], best_hyper_params[0], max(1,component), 2, best_hyper_params[4]).to(dev)
-        dm.train_and_test(model, data_set, train_proportion, 20, best_hyper_params[1],best_hyper_params[2],best_hyper_params[3],epochs_per_set[i], component, f"CNN_test_{component}.txt")
     bar.finish()
     elapsed = time.time()-start_time
     print(f'CNN optimisation completed, results stored in {output_file}'
@@ -221,8 +215,6 @@ for component in range(3):
                 +f'Kernel Size: {best_hyper_params[5]}\n'
                 +f'Dataset: {file_names[i]}')
         f.close()
-        model = models.TCN(best_hyper_params[3], max(1, component), [best_hyper_params[0]]*3, best_hyper_params[5], best_hyper_params[4]).to(dev)
-        dm.train_and_test(model, data_set, train_proportion, 20, best_hyper_params[1],best_hyper_params[2],best_hyper_params[3],epochs_per_set[i], component, f"TCN_test_{component}.txt")
 
     bar.finish()
     elapsed = time.time()-start_time
